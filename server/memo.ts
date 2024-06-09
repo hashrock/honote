@@ -1,44 +1,97 @@
 import { Hono } from "jsr:@hono/hono";
 import { addMemo, getMemo, listMemo, updateMemo } from "./utils/db.ts";
 import { deleteMemo } from "./utils/db.ts";
+import { createGitHubOAuthConfig, createHelpers } from "jsr:@deno/kv-oauth";
+import { getUserBySession } from "./utils/db.ts";
 
 const memo = new Hono();
 
+const { getSessionId } = createHelpers(
+  createGitHubOAuthConfig(),
+);
+
 //list
-memo.get("/", async (c) => c.json(await listMemo("1")));
+memo.get("/", async (c) => {
+  const sessionId = await getSessionId(c.req.raw);
+  if (!sessionId) {
+    return c.json({ status: "not signed in" });
+  }
+  const user = await getUserBySession(sessionId);
+  if (!user) {
+    return c.json({ status: "not signed in" });
+  }
+
+  return c.json(await listMemo(user.id));
+});
 
 //new
 memo.post("/", async (c) => {
+  const sessionId = await getSessionId(c.req.raw);
+  if (!sessionId) {
+    return c.json({ status: "not signed in" });
+  }
+  const user = await getUserBySession(sessionId);
+  if (!user) {
+    return c.json({ status: "not signed in" });
+  }
+
   const json = await c.req.json();
   const title = json.data.title;
   const body = json.data.body;
   const updatedAt = new Date();
 
-  await addMemo("1", title, body);
+  await addMemo(user.id, title, body);
   return c.json({ title, body, updatedAt });
 });
 
 //show
 memo.get("/:id", async (c) => {
+  const sessionId = await getSessionId(c.req.raw);
+  if (!sessionId) {
+    return c.json({ status: "not signed in" });
+  }
+  const user = await getUserBySession(sessionId);
+  if (!user) {
+    return c.json({ status: "not signed in" });
+  }
+
   const id = c.req.param("id");
-  return c.json(await getMemo("1", id));
+  return c.json(await getMemo(user.id, id));
 });
 
 //update
 memo.put("/:id", async (c) => {
+  const sessionId = await getSessionId(c.req.raw);
+  if (!sessionId) {
+    return c.json({ status: "not signed in" });
+  }
+  const user = await getUserBySession(sessionId);
+  if (!user) {
+    return c.json({ status: "not signed in" });
+  }
+
   const id = c.req.param("id");
   const json = await c.req.json();
   const title = json.data.title;
   const body = json.data.body;
 
-  await updateMemo("1", id, title, body);
+  await updateMemo(user.id, id, title, body);
   const updatedAt = new Date();
   return c.json({ title, body, updatedAt });
 });
 
 memo.delete("/:id", async (c) => {
+  const sessionId = await getSessionId(c.req.raw);
+  if (!sessionId) {
+    return c.json({ status: "not signed in" });
+  }
+  const user = await getUserBySession(sessionId);
+  if (!user) {
+    return c.json({ status: "not signed in" });
+  }
+
   const id = c.req.param("id");
-  await deleteMemo("1", id);
+  await deleteMemo(user.id, id);
   return c.json({ message: "deleted" });
 });
 

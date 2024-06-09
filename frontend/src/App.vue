@@ -53,7 +53,6 @@ interface User {
   login: string;
   name: string;
   avatarUrl: string;
-  memos?: string[];
 }
 
 export default defineComponent({
