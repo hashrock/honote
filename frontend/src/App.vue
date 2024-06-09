@@ -18,6 +18,22 @@
         <option v-for="item in list" :value="item.id">{{ item.title }} - {{ item.updatedAt }}</option>
       </select>
     </div>
+
+    <div>
+      <img v-if="user" :src="user.avatarUrl" alt="avatar" width="30" />
+      <div v-if="user">{{ user.login }} - {{ user.name }}</div>
+      <div v-if="user">
+        <a href="/api/signout">
+          Sign out
+        </a>
+      </div>
+      <div v-else>
+        <a href="/api/signin">
+          Sign in
+        </a>
+      </div>
+
+    </div>
   </div>
 </template>
 
@@ -32,6 +48,14 @@ interface Memo {
   updatedAt: string;
 }
 
+interface User {
+  id: string;
+  login: string;
+  name: string;
+  avatarUrl: string;
+  memos?: string[];
+}
+
 export default defineComponent({
   data() {
     return {
@@ -41,17 +65,33 @@ export default defineComponent({
       updatedAt: '',
       list: [] as Memo[],
       selectedId: '',
+      user: null as User | null,
     };
   },
   methods: {
     async loadMemo() {
-      const res = await fetch("/api/memo");
+      const res = await fetch("/api/memo", {
+        credentials: 'include',
+      });
       const data = await res.json();
       this.list = data;
     },
 
+    async loadUser() {
+      const res = await fetch("/api/user", {
+        credentials: 'include',
+      });
+      const data = await res.json();
+
+
+      this.user = data.user;
+      console.log(data);
+    },
+
     async load() {
-      const res = await fetch(`/api/memo/${this.selectedId}`);
+      const res = await fetch(`/api/memo/${this.selectedId}`, {
+        credentials: 'include',
+      });
       const data = await res.json();
       this.documentId = data.id;
       this.title = data.title;
@@ -71,6 +111,7 @@ export default defineComponent({
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: 'include',
         });
         const resjson = await res.json();
         const updatedAt = new Date(resjson.updatedAt);
@@ -87,6 +128,7 @@ export default defineComponent({
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: 'include',
         });
         const resjson = await res.json();
         const updatedAt = new Date(resjson.updatedAt);
@@ -98,6 +140,7 @@ export default defineComponent({
   },
 
   mounted() {
+    this.loadUser()
     this.loadMemo()
   },
 
