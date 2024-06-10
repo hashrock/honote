@@ -7,7 +7,8 @@
       <div class="editorLayout">
         <select class="memo" v-model="selectedId" @change="load">
           <option value="">New memo</option>
-          <option v-for="item in memos" :value="item.id">{{ item.title }} - {{ item.updatedAt }}</option>
+          <option v-for="item in memos" :value="item.id">{{ item.title }} - {{ new Date(item.updatedAt).toLocaleString()
+            }}</option>
         </select>
 
         <input type="text" class="title" v-model="title" />
