@@ -3,24 +3,26 @@
     <Header :user="user"></Header>
 
     <div class="layout">
-      <div>docId: <input type="text" id="documentId" v-model="documentId" /></div>
-
-      <div>title: <input type="text" id="title" v-model="title" /></div>
-      <div>
-        <textarea id="editor" v-model="editor"></textarea>
-      </div>
-      <div>
-        <button id="save" @click="save">Save</button>
-        <button id="delete" @click="delete">Delete</button>
-      </div>
-
-      <div id="updatedAt">{{ updatedAt }}</div>
 
       <div>
-        <select id="list" v-model="selectedId" @change="load">
+        <select class="memo" v-model="selectedId" @change="load">
+          <option value="">New memo</option>
           <option v-for="item in memos" :value="item.id">{{ item.title }} - {{ item.updatedAt }}</option>
         </select>
       </div>
+
+      <div><input type="text" class="title" v-model="title" /></div>
+      <div>
+        <textarea v-model="editor" class="editor"></textarea>
+      </div>
+      <div>
+        <button class="action" @click="save">Save</button>
+        <button class="action" @click="delete">Delete</button>
+      </div>
+
+      <div class="updatedAt">{{ updatedAt }}</div>
+
+
     </div>
 
 
@@ -57,7 +59,19 @@ export default defineComponent({
       this.user = await fetchUserData()
     },
 
+    clear() {
+      this.documentId = '';
+      this.title = "untitled " + new Date().toLocaleString();
+      this.editor = '';
+      this.updatedAt = '';
+    },
+
     async load() {
+      if (!this.selectedId) {
+        this.clear();
+        return;
+      }
+
       const data = await getMemo(this.selectedId);
       this.documentId = data.id;
       this.title = data.title;
@@ -97,5 +111,9 @@ body {
 
 .layout {
   margin: 20px;
+}
+
+select.memo {
+  width: 100%;
 }
 </style>
