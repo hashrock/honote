@@ -1,61 +1,41 @@
 <template>
-  <div>
-    <div>docId: <input type="text" id="documentId" v-model="documentId" /></div>
+  <div class="app">
+    <Header :user="user"></Header>
 
-    <div>title: <input type="text" id="title" v-model="title" /></div>
-    <div>
-      <textarea id="editor" v-model="editor"></textarea>
-    </div>
-    <div>
-      <button id="save" @click="save">Save</button>
-      <button id="delete" @click="delete">Delete</button>
-    </div>
+    <div class="layout">
+      <div>docId: <input type="text" id="documentId" v-model="documentId" /></div>
 
-    <div id="updatedAt">{{ updatedAt }}</div>
-
-    <div>
-      <select id="list" v-model="selectedId" @change="load">
-        <option v-for="item in list" :value="item.id">{{ item.title }} - {{ item.updatedAt }}</option>
-      </select>
-    </div>
-
-    <div>
-      <img v-if="user" :src="user.avatarUrl" alt="avatar" width="30" />
-      <div v-if="user">{{ user.login }} - {{ user.name }}</div>
-      <div v-if="user">
-        <a href="/api/signout">
-          Sign out
-        </a>
+      <div>title: <input type="text" id="title" v-model="title" /></div>
+      <div>
+        <textarea id="editor" v-model="editor"></textarea>
       </div>
-      <div v-else>
-        <a href="/api/signin">
-          Sign in
-        </a>
+      <div>
+        <button id="save" @click="save">Save</button>
+        <button id="delete" @click="delete">Delete</button>
       </div>
 
+      <div id="updatedAt">{{ updatedAt }}</div>
+
+      <div>
+        <select id="list" v-model="selectedId" @change="load">
+          <option v-for="item in list" :value="item.id">{{ item.title }} - {{ item.updatedAt }}</option>
+        </select>
+      </div>
     </div>
+
+
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-
-
-interface Memo {
-  id: string;
-  title: string;
-  body: string;
-  updatedAt: string;
-}
-
-interface User {
-  id: string;
-  login: string;
-  name: string;
-  avatarUrl: string;
-}
+import { Memo, User } from './types';
+import Header from "./components/Header.vue";
 
 export default defineComponent({
+  components: {
+    Header,
+  },
   data() {
     return {
       documentId: '',
@@ -147,4 +127,16 @@ export default defineComponent({
 
 </script>
 
-<style scoped></style>
+<style>
+body {
+  margin: 0;
+}
+
+.app {
+  /* margin: 20px; */
+}
+
+.layout {
+  margin: 20px;
+}
+</style>
