@@ -33,6 +33,7 @@ import { defineComponent } from 'vue';
 import { Memo, User } from './types';
 import Header from "./components/Header.vue";
 import { listMemo, fetchUserData, getMemo, updateMemo, postMemo, deleteMemo } from './api';
+import { useDebounceFn } from '@vueuse/core'
 
 export default defineComponent({
   components: {
@@ -42,12 +43,36 @@ export default defineComponent({
     return {
       documentId: '',
       title: '',
+      oldTitle: '',
       editor: '',
+      oldEditor: '',
       updatedAt: '',
       memos: [] as Memo[],
       selectedId: '',
       user: null as User | null,
+      debounceSave: null as any,
     };
+  },
+
+  watch: {
+    editor: {
+      handler: function (_value) {
+        if (this.editor === this.oldEditor) {
+          return;
+        }
+        this.debounceSave()
+      },
+      deep: true
+    },
+    title: {
+      handler: function (_value) {
+        if (this.title === this.oldTitle) {
+          return;
+        }
+        this.debounceSave()
+      },
+      deep: true
+    }
   },
   methods: {
     async loadMemos() {
@@ -60,8 +85,11 @@ export default defineComponent({
 
     clear() {
       this.documentId = '';
-      this.title = "untitled " + new Date().toLocaleString();
+      const newTitle = "untitled " + new Date().toLocaleString();
+      this.title = newTitle;
+      this.oldTitle = newTitle;
       this.editor = '';
+      this.oldEditor = '';
       this.updatedAt = '';
     },
 
@@ -88,7 +116,9 @@ export default defineComponent({
       const data = await getMemo(this.selectedId);
       this.documentId = data.id;
       this.title = data.title;
+      this.oldTitle = data.title;
       this.editor = data.body;
+      this.oldEditor = data.body;
 
       const updatedAt = new Date(data.updatedAt);
       this.updatedAt = updatedAt.toLocaleString();
@@ -99,13 +129,19 @@ export default defineComponent({
         const updatedAt = new Date(json.updatedAt);
         this.updatedAt = updatedAt.toLocaleString();
       } else {
-        const json = await postMemo(this.title, this.editor);
+        const json: Memo = await postMemo(this.title, this.editor);
         const updatedAt = new Date(json.updatedAt);
         this.updatedAt = updatedAt.toLocaleString();
+        this.documentId = json.id;
+        this.selectedId = json.id;
       }
 
       this.loadMemos();
     }
+  },
+
+  created() {
+    this.debounceSave = useDebounceFn(this.save, 1000)
   },
 
   mounted() {

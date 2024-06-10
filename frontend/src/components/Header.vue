@@ -23,7 +23,6 @@ export default defineComponent({
   props: {
     user: {
       type: Object as () => User | null,
-      required: true,
     },
   },
   data() {

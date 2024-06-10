@@ -43,10 +43,9 @@ memo.post("/", async (c) => {
   const json = await c.req.json();
   const title = json.data.title;
   const body = json.data.body;
-  const updatedAt = new Date();
 
-  await addMemo(user.id, title, body);
-  return c.json({ title, body, updatedAt });
+  const newMemo = await addMemo(user.id, title, body);
+  return c.json(newMemo);
 });
 
 //show

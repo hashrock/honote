@@ -15,6 +15,7 @@
       "jsr:@std/media-types@^0.221.0": "jsr:@std/media-types@0.221.0",
       "jsr:@std/path@^0.221.0": "jsr:@std/path@0.221.0",
       "jsr:@std/streams@^0.221.0": "jsr:@std/streams@0.221.0",
+      "jsr:@std/ulid": "jsr:@std/ulid@0.224.1",
       "npm:superjson@1.13.3": "npm:superjson@1.13.3"
     },
     "jsr": {
@@ -70,6 +71,9 @@
       },
       "@std/streams@0.221.0": {
         "integrity": "47f2f74634b47449277c0ee79fe878da4424b66bd8975c032e3afdca88986e61"
+      },
+      "@std/ulid@0.224.1": {
+        "integrity": "4de06fdb030ff3990b1b0344e330373c11ce6051ac449fc435667a485a6723fa"
       }
     },
     "npm": {
