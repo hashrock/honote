@@ -18,7 +18,7 @@
 
       <div>
         <select id="list" v-model="selectedId" @change="load">
-          <option v-for="item in list" :value="item.id">{{ item.title }} - {{ item.updatedAt }}</option>
+          <option v-for="item in memos" :value="item.id">{{ item.title }} - {{ item.updatedAt }}</option>
         </select>
       </div>
     </div>
@@ -31,6 +31,7 @@
 import { defineComponent } from 'vue';
 import { Memo, User } from './types';
 import Header from "./components/Header.vue";
+import { listMemo, fetchUserData, getMemo, updateMemo, postMemo } from './api';
 
 export default defineComponent({
   components: {
@@ -42,85 +43,47 @@ export default defineComponent({
       title: '',
       editor: '',
       updatedAt: '',
-      list: [] as Memo[],
+      memos: [] as Memo[],
       selectedId: '',
       user: null as User | null,
     };
   },
   methods: {
-    async loadMemo() {
-      const res = await fetch("/api/memo", {
-        credentials: 'include',
-      });
-      const data = await res.json();
-      this.list = data;
+    async loadMemos() {
+      this.memos = await listMemo();
     },
 
     async loadUser() {
-      const res = await fetch("/api/user", {
-        credentials: 'include',
-      });
-      const data = await res.json();
-
-
-      this.user = data.user;
-      console.log(data);
+      this.user = await fetchUserData()
     },
 
     async load() {
-      const res = await fetch(`/api/memo/${this.selectedId}`, {
-        credentials: 'include',
-      });
-      const data = await res.json();
+      const data = await getMemo(this.selectedId);
       this.documentId = data.id;
       this.title = data.title;
       this.editor = data.body;
+
       const updatedAt = new Date(data.updatedAt);
       this.updatedAt = updatedAt.toLocaleString();
     },
     async save() {
       if (this.documentId) {
-        const data = {
-          title: this.title,
-          body: this.editor
-        };
-        const res = await fetch(`/api/memo/${this.documentId}`, {
-          method: "PUT",
-          body: JSON.stringify({ data }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: 'include',
-        });
-        const resjson = await res.json();
-        const updatedAt = new Date(resjson.updatedAt);
+        const json = await updateMemo(this.documentId, this.title, this.editor);
+        const updatedAt = new Date(json.updatedAt);
         this.updatedAt = updatedAt.toLocaleString();
-
       } else {
-        const data = {
-          title: this.title,
-          body: this.editor
-        };
-        const res = await fetch("/api/memo", {
-          method: "POST",
-          body: JSON.stringify({ data }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: 'include',
-        });
-        const resjson = await res.json();
-        const updatedAt = new Date(resjson.updatedAt);
+        const json = await postMemo(this.title, this.editor);
+        const updatedAt = new Date(json.updatedAt);
         this.updatedAt = updatedAt.toLocaleString();
       }
 
-      this.loadMemo();
+      this.loadMemos();
     }
   },
 
   mounted() {
     this.loadUser()
-    this.loadMemo()
+    this.loadMemos()
   },
 
 });
@@ -130,10 +93,6 @@ export default defineComponent({
 <style>
 body {
   margin: 0;
-}
-
-.app {
-  /* margin: 20px; */
 }
 
 .layout {
