@@ -51,7 +51,12 @@ export async function listMemo() {
   return data;
 }
 
-export async function deleteMemo() {
+export async function deleteMemo(documentId: string) {
+  const res = await fetch(`/api/memo/${documentId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  return await res.json();
 }
 
 export async function fetchUserData() {

@@ -4,20 +4,19 @@
 
     <div class="layout">
 
-      <div>
+      <div class="editorLayout">
         <select class="memo" v-model="selectedId" @change="load">
           <option value="">New memo</option>
           <option v-for="item in memos" :value="item.id">{{ item.title }} - {{ item.updatedAt }}</option>
         </select>
-      </div>
 
-      <div><input type="text" class="title" v-model="title" /></div>
-      <div>
+        <input type="text" class="title" v-model="title" />
         <textarea v-model="editor" class="editor"></textarea>
       </div>
+
       <div>
         <button class="action" @click="save">Save</button>
-        <button class="action" @click="delete">Delete</button>
+        <button class="action" @click="removeMemo">Delete</button>
       </div>
 
       <div class="updatedAt">{{ updatedAt }}</div>
@@ -33,7 +32,7 @@
 import { defineComponent } from 'vue';
 import { Memo, User } from './types';
 import Header from "./components/Header.vue";
-import { listMemo, fetchUserData, getMemo, updateMemo, postMemo } from './api';
+import { listMemo, fetchUserData, getMemo, updateMemo, postMemo, deleteMemo } from './api';
 
 export default defineComponent({
   components: {
@@ -64,6 +63,20 @@ export default defineComponent({
       this.title = "untitled " + new Date().toLocaleString();
       this.editor = '';
       this.updatedAt = '';
+    },
+
+    async removeMemo() {
+      if (!this.documentId) {
+        return;
+      }
+
+      if (!confirm('Are you sure to delete?')) {
+        return;
+      }
+
+      await deleteMemo(this.documentId);
+      this.loadMemos();
+      this.clear();
     },
 
     async load() {
@@ -114,6 +127,25 @@ body {
 }
 
 select.memo {
-  width: 100%;
+  padding: 4px;
+  border: none;
+  font-size: inherit;
+}
+
+input.title {
+  padding: 4px;
+  font-size: 1.5rem;
+}
+
+textarea.editor {
+  height: 300px;
+  padding: 4px;
+  font-size: 16px;
+}
+
+.editorLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 </style>
