@@ -3,6 +3,11 @@ import { addMemo, getMemo, listMemo, updateMemo } from "./utils/db.ts";
 import { deleteMemo } from "./utils/db.ts";
 import { createGitHubOAuthConfig, createHelpers } from "jsr:@deno/kv-oauth";
 import { getUserBySession } from "./utils/db.ts";
+import { loadSync } from "jsr:@std/dotenv";
+
+loadSync({
+  export: true,
+});
 
 const memo = new Hono();
 
