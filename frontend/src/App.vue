@@ -3,27 +3,38 @@
     <Header :user="user"></Header>
 
     <div class="layout">
+      <div v-if="isAuth">
+        <div class="editorLayout">
+          <select class="memo" v-model="selectedId" @change="load">
+            <option value="">New memo</option>
+            <option v-for="item in memos" :value="item.id">{{ item.title }} - {{ new
+              Date(item.updatedAt).toLocaleString()
+              }}</option>
+          </select>
 
-      <div class="editorLayout">
-        <select class="memo" v-model="selectedId" @change="load">
-          <option value="">New memo</option>
-          <option v-for="item in memos" :value="item.id">{{ item.title }} - {{ new Date(item.updatedAt).toLocaleString()
-            }}</option>
-        </select>
+          <input type="text" class="title" v-model="title" />
+          <textarea v-model="editor" class="editor"></textarea>
+        </div>
 
-        <input type="text" class="title" v-model="title" />
-        <textarea v-model="editor" class="editor"></textarea>
+        <div>
+          <button class="action" @click="save">Save</button>
+          <button class="action" @click="removeMemo">Delete</button>
+        </div>
+
+        <div class="updatedAt">{{ updatedAt }}</div>
+
+        <div class="errorMessages">
+          <ul>
+            <li v-for="message in errorMessages" :key="message">{{ message }}</li>
+          </ul>
+        </div>
       </div>
-
-      <div>
-        <button class="action" @click="save">Save</button>
-        <button class="action" @click="removeMemo">Delete</button>
+      <div v-else>
+        <p>Please login</p>
       </div>
-
-      <div class="updatedAt">{{ updatedAt }}</div>
-
 
     </div>
+
 
 
   </div>
@@ -52,6 +63,8 @@ export default defineComponent({
       selectedId: '',
       user: null as User | null,
       debounceSave: null as any,
+      isAuth: false,
+      errorMessages: [] as string[]
     };
   },
 
@@ -77,11 +90,20 @@ export default defineComponent({
   },
   methods: {
     async loadMemos() {
-      this.memos = await listMemo();
+      try {
+        this.memos = await listMemo();
+      } catch (e) {
+        this.errorMessages.push(e.message)
+      }
     },
 
     async loadUser() {
-      this.user = await fetchUserData()
+      try {
+        this.user = await fetchUserData()
+        this.isAuth = true;
+      } catch (e) {
+        this.errorMessages.push(e.message)
+      }
     },
 
     clear() {
@@ -184,5 +206,9 @@ textarea.editor {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.errorMessages {
+  color: red;
 }
 </style>

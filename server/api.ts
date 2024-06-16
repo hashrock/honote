@@ -15,6 +15,7 @@ import {
 import { getAuthenticatedUser } from "./utils/github.ts";
 import { User } from "./utils/types.ts";
 import { Hono } from "jsr:@hono/hono";
+import { HTTPException } from "jsr:@hono/hono/http-exception";
 
 const api = new Hono();
 
@@ -29,7 +30,7 @@ const { signIn, handleCallback, signOut, getSessionId } = createHelpers(
 api.get("/user", async (c) => {
   const sessionId = await getSessionId(c.req.raw);
   if (!sessionId) {
-    return c.json({ status: "not signed in" });
+    throw new HTTPException(401, { message: "not signed in" });
   }
 
   const user = await getUserBySession(sessionId);
