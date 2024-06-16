@@ -50,11 +50,13 @@ api.get("/signin", async (c) => {
 
 api.get("/callback", async (c) => {
   const { response, tokens, sessionId } = await handleCallback(c.req.raw);
+  if (!sessionId) {
+    throw new HTTPException(401, { message: "not signed in" });
+  }
 
   const ghUser = await getAuthenticatedUser(tokens!.accessToken);
-
   if (!ghUser) {
-    return c.json({ status: "failed to get user" });
+    throw new HTTPException(403, { message: "failed to get user" });
   }
 
   const userInDb = await getUserById(String(ghUser.id));

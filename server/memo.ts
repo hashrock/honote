@@ -4,6 +4,7 @@ import { deleteMemo } from "./utils/db.ts";
 import { createGitHubOAuthConfig, createHelpers } from "jsr:@deno/kv-oauth";
 import { getUserBySession } from "./utils/db.ts";
 import { loadSync } from "jsr:@std/dotenv";
+import { HTTPException } from "jsr:@hono/hono/http-exception";
 
 loadSync({
   export: true,
@@ -18,12 +19,13 @@ const { getSessionId } = createHelpers(
 //list
 memo.get("/", async (c) => {
   const sessionId = await getSessionId(c.req.raw);
+
   if (!sessionId) {
-    return c.json({ status: "not signed in" });
+    throw new HTTPException(401, { message: "not signed in" });
   }
   const user = await getUserBySession(sessionId);
   if (!user) {
-    return c.json({ status: "not signed in" });
+    throw new HTTPException(403, { message: "failed to get user" });
   }
 
   return c.json(await listMemo(user.id));
@@ -33,11 +35,11 @@ memo.get("/", async (c) => {
 memo.post("/", async (c) => {
   const sessionId = await getSessionId(c.req.raw);
   if (!sessionId) {
-    return c.json({ status: "not signed in" });
+    throw new HTTPException(401, { message: "not signed in" });
   }
   const user = await getUserBySession(sessionId);
   if (!user) {
-    return c.json({ status: "not signed in" });
+    throw new HTTPException(403, { message: "failed to get user" });
   }
 
   const json = await c.req.json();
@@ -52,11 +54,11 @@ memo.post("/", async (c) => {
 memo.get("/:id", async (c) => {
   const sessionId = await getSessionId(c.req.raw);
   if (!sessionId) {
-    return c.json({ status: "not signed in" });
+    throw new HTTPException(401, { message: "not signed in" });
   }
   const user = await getUserBySession(sessionId);
   if (!user) {
-    return c.json({ status: "not signed in" });
+    throw new HTTPException(403, { message: "failed to get user" });
   }
 
   const id = c.req.param("id");
@@ -67,11 +69,11 @@ memo.get("/:id", async (c) => {
 memo.put("/:id", async (c) => {
   const sessionId = await getSessionId(c.req.raw);
   if (!sessionId) {
-    return c.json({ status: "not signed in" });
+    throw new HTTPException(401, { message: "not signed in" });
   }
   const user = await getUserBySession(sessionId);
   if (!user) {
-    return c.json({ status: "not signed in" });
+    throw new HTTPException(403, { message: "failed to get user" });
   }
 
   const id = c.req.param("id");
@@ -87,11 +89,11 @@ memo.put("/:id", async (c) => {
 memo.delete("/:id", async (c) => {
   const sessionId = await getSessionId(c.req.raw);
   if (!sessionId) {
-    return c.json({ status: "not signed in" });
+    throw new HTTPException(401, { message: "not signed in" });
   }
   const user = await getUserBySession(sessionId);
   if (!user) {
-    return c.json({ status: "not signed in" });
+    throw new HTTPException(403, { message: "failed to get user" });
   }
 
   const id = c.req.param("id");
